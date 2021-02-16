@@ -1,0 +1,165 @@
+Задание 4.1
+select count(city), city
+from dst_project.airports
+group by 2
+order by 1 desc
+=============================
+Задание 4.2
+Вопрос 1
+select count(distinct status)
+from dst_project.flights
+-----------------------------
+Вопрос 2
+select count(aircraft_code)
+from dst_project.flights
+where status = 'Departed'
+-----------------------------
+Вопрос 3
+select count(s.seat_no)
+from dst_project.aircrafts a
+	join dst_project.seats s on a.aircraft_code = s.aircraft_code
+where a.model = 'Boeing 777-300'
+------------------------------
+Вопрос 4
+select count(f.flight_id) 
+from dst_project.flights f
+where f.actual_arrival between '2017-04-01' and '2017-09-01' and
+    f.status = 'Arrived'
+===============================
+Задание 4.3
+Вопрос 1
+select count(status) 
+from dst_project.flights
+where status = 'Cancelled'
+-------------------------------
+Вопрос 2
+select *
+from
+(select count(*) Boeing
+from dst_project.aircrafts a
+where a.model like 'Boeing%') a,
+(select count(*) Sukhoi
+from dst_project.aircrafts b
+where b.model like 'Sukhoi Superjet%') b,
+(select count(*) Airbus
+from dst_project.aircrafts c
+where c.model like 'Airbus%') c
+---------------------------------
+Вопрос 3
+select *
+from
+(select count(timezone)
+from dst_project.airports) v,
+(select count(*) Asia
+from dst_project.airports
+where timezone like 'Asia%') a,
+(select count(*) Europa
+from dst_project.airports
+where timezone like 'Europe%') b
+----------------------------------
+Вопрос 4
+select flight_id, actual_arrival - scheduled_arrival lateness
+from dst_project.flights
+where actual_arrival > scheduled_arrival
+order by 2 desc
+limit 1
+====================================
+Задание 4.4
+Вопрос 1
+select scheduled_departure
+from dst_project.flights
+order by 1
+limit 1
+-------------------------------------
+Вопрос 2
+select scheduled_departure - scheduled_arrival max_long
+from dst_project.flights
+order by 1
+limit 1
+-------------------------------------
+Вопрос 3
+select scheduled_departure - scheduled_arrival max_long, departure_airport, arrival_airport 
+from dst_project.flights
+order by 1
+limit 10
+-------------------------------------
+Вопрос 4
+select avg(scheduled_arrival - scheduled_departure) 
+from dst_project.flights
+=====================================
+Задание 4.5
+Вопрос 1
+select s.fare_conditions, count(s.seat_no)
+from dst_project.seats s
+    join dst_project. aircrafts a on a.aircraft_code = s.aircraft_code
+where a.model = 'Sukhoi Superjet-100'
+group by 1
+-------------------------------------
+Вопрос 2
+select min(total_amount)
+from dst_project.bookings
+-------------------------------------
+Вопрос 3
+select b.seat_no
+from dst_project.tickets t
+    join dst_project.boarding_passes b on b.ticket_no = t.ticket_no
+where t.passenger_id = '4313 788533'
+=====================================
+Задание 5.1
+Вопрос 1
+select count(status)
+from dst_project.flights
+where arrival_airport = 'AAQ' and (actual_arrival between '2017-01-01' and '2017-12-31')
+-------------------------------------
+Вопрос 2
+select count(status)
+from dst_project.flights
+where arrival_airport = 'AAQ' and (actual_departure between '2017-01-01' and '2017-03-01')
+-------------------------------------
+Вопрос 3
+select count(*)
+from dst_project.flights
+where arrival_airport = 'AAQ' and status = 'Cancelled'
+-------------------------------------
+Вопрос 4
+select count(flight_id)
+from dst_project.flights
+where departure_airport = 'AAQ' and arrival_airport not in ('SVO', 'VKO', 'DME')
+-------------------------------------
+Вопрос 5
+select a.model, count(s.seat_no), f.arrival_airport
+from dst_project.aircrafts a
+    join dst_project.seats s on a.aircraft_code = s.aircraft_code
+    join dst_project.flights f on a.aircraft_code = f.aircraft_code
+group by 1,3
+having f.arrival_airport = 'AAQ'
+order by 2 desc
+======================================
+======================================
+======================================
+select
+    f.flight_id, -- идентификатор рейса
+    f.flight_no, -- номер рейса (хотя можно было бы и не брать)
+    f.actual_departure, -- фактическое время вылета
+    f.actual_arrival, -- фактическое время прилёта
+    --f.status, -- статус рейса включать не буду, т.к. все рейсы Arrived
+    f.aircraft_code, -- код самолёта
+    f.departure_airport, -- аэропорт отправления
+    f.arrival_airport, -- аэропорт прибытия
+    t.fare_conditions, -- класс обслуживания
+    a.range, -- максимальная дальность полёта в км
+    count(s.seat_no) count_seats, -- количество мест
+    sum(t.amount) sum_amount,-- сумма проданных билетов
+    date_part('hour', f.actual_arrival - f.actual_departure)*60 + date_part('minute', f.actual_arrival - f.actual_departure) travel_time -- время полёта в минутах
+from dst_project.flights f
+    left join dst_project.ticket_flights t on f.flight_id = t.flight_id
+    left join dst_project.aircrafts a on f.aircraft_code = a.aircraft_code
+    left join dst_project.seats s on f.aircraft_code = s.aircraft_code
+where f.departure_airport = 'AAQ' and (date_trunc('month', f.actual_departure) in ('2016-12-01', '2017-01-01','2017-02-01'))
+group by 1,2,3,4,5,6,7,8,9
+/* Данные предоставлены от 15 августа 2016 по 14 сентября 2017 и соответственно 
+был сделан запрос на зимнее время, исходя из временного промежутка этих данных*/
+
+
+
+
